@@ -16,6 +16,8 @@ import {
     BigPlayButton, PlaybackRateMenuButton, VolumeMenuButton,
 } from "video-react";
 import { ITag } from "vott-ct/lib/js/CanvasTools/Interface/ITag";
+import { ClipBoard } from "../../../../common/clipboard";
+import { KeyboardBinding } from "../../common/keyboardBinding/keyboardBinding";
 
 export interface ICanvasProps {
     selectedAsset: IAssetMetadata;
@@ -32,6 +34,7 @@ interface ICanvasState {
 
 export default class Canvas extends React.Component<ICanvasProps, ICanvasState> {
     public editor: Editor;
+    private clipBoard: ClipBoard<IRegion[]>;
 
     public state: ICanvasState = {
         loaded: false,
@@ -67,6 +70,10 @@ export default class Canvas extends React.Component<ICanvasProps, ICanvasState> 
 
         return (
             <div id="ct-zone" className={this.state.canvasEnabled ? "canvas-enabled" : "canvas-disabled"}>
+                <KeyboardBinding accelerator={"Ctrl+C"} onKeyDown={this.copyRegions}/>
+                <KeyboardBinding accelerator={"Ctrl+X"} onKeyDown={this.cutRegions}/>
+                <KeyboardBinding accelerator={"Ctrl+V"} onKeyDown={this.pasteRegions}/>
+
                 {selectedAsset.asset.type === AssetType.Video &&
                     <Player ref={this.videoPlayer}
                         fluid={false} width={"100%"} height={"100%"}
@@ -125,29 +132,42 @@ export default class Canvas extends React.Component<ICanvasProps, ICanvasState> 
         this.props.onAssetMetadataChanged(currentAssetMetadata);
     }
 
+    /**
+     * Add tag to or remove tag from selected regions
+     * @param tag Tag to apply to or remove from selected regions 
+     */
     public onTagClicked = (tag: ITagMetadata) => {
-        const selectedAsset = this.props.selectedAsset;
         if (this.state.selectedRegions && this.state.selectedRegions.length) {
             const selectedRegions = this.state.selectedRegions;
             selectedRegions.map((region) => {
-                const selectedIndex = selectedAsset.regions.findIndex((r) => r.id === region.id);
-                const selectedRegion = selectedAsset.regions[selectedIndex];
-                const tagIndex = selectedRegion.tags.findIndex(
-                    (existingTag) => existingTag.name === tag.name);
-                if (tagIndex === -1) {
-                    selectedRegion.tags.push(tag);
-                } else {
-                    selectedRegion.tags.splice(tagIndex, 1);
-                }
-                if (selectedRegion.tags.length) {
-                    this.editor.RM.updateTagsById(selectedRegion.id,
-                        new TagsDescriptor(selectedRegion.tags.map((tempTag) => new Tag(tempTag.name,
+                this.toggleTag(region, tag)
+                // There is a tag on the region
+                if (region.tags.length) {
+                    this.editor.RM.updateTagsById(region.id,
+                        new TagsDescriptor(region.tags.map((tempTag) => new Tag(tempTag.name,
                             this.props.project.tags.find((t) => t.name === tempTag.name).color))));
                 } else {
-                    this.editor.RM.updateTagsById(selectedRegion.id, null);
+                    this.editor.RM.updateTagsById(region.id, null);
                 }
                 return region;
             });
+        }
+    }
+
+    /**
+     * Add tag to region if not there already, remove tag from region
+     * if already contained in tags
+     * @param region Region to add or remove tag
+     * @param tag Tag to add or remove from region
+     */
+    private toggleTag = (region: IRegion, tag: ITagMetadata) => {
+        const tagIndex = region.tags.findIndex((existingTag) => existingTag.name === tag.name);
+        if (tagIndex === -1) {
+            // Tag isn't found within region tags, add it
+            region.tags.push(tag);
+        } else {
+            // Tag is within region tags, remove it
+            region.tags.splice(tagIndex, 1);
         }
     }
 
@@ -208,8 +228,24 @@ export default class Canvas extends React.Component<ICanvasProps, ICanvasState> 
             selectedRegions = [
                 this.props.selectedAsset.regions.find((region) => region.id === id)];
         }
-
+        debugger;
         this.updateSelected(selectedRegions);
+    }
+
+    private copyRegions = () => {
+        if (this.state.selectedRegions) {
+            this.clipBoard.set(this.state.selectedRegions);
+        }
+    }
+
+    private cutRegions = () => {
+        this.copyRegions();
+        // Remove regions from asset
+    }
+
+    private pasteRegions = () => {
+        const regions = this.clipBoard.get();
+        // Add regions to asset
     }
 
     /**
