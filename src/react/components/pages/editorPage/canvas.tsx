@@ -146,7 +146,6 @@ export default class Canvas extends React.Component<ICanvasProps, ICanvasState> 
                 } else {
                     this.editor.RM.updateTagsById(selectedRegion.id, null);
                 }
-
                 return region;
             });
         }
