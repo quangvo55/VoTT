@@ -166,31 +166,8 @@ export default class EditorPage extends React.Component<IEditorPageProps, IEdito
      * @param tag Tag clicked
      */
     public onTagClicked(tag: ITagMetadata) {
-        const selectedAsset = this.state.selectedAsset;
-        if (this.canvas.current.state.selectedRegions && this.canvas.current.state.selectedRegions.length) {
-            const selectedRegions = this.canvas.current.state.selectedRegions;
-            selectedRegions.map((region) => {
-                const selectedIndex = selectedAsset.regions.findIndex((r) => r.id === region.id);
-                const selectedRegion = selectedAsset.regions[selectedIndex];
-                const tagIndex = selectedRegion.tags.findIndex(
-                    (existingTag) => existingTag.name === tag.name);
-                if (tagIndex === -1) {
-                    selectedRegion.tags.push(tag);
-                } else {
-                    selectedRegion.tags.splice(tagIndex, 1);
-                }
-                if (selectedRegion.tags.length) {
-                    this.canvas.current.editor.RM.updateTagsById(selectedRegion.id,
-                        new TagsDescriptor(selectedRegion.tags.map((tempTag) => new Tag(tempTag.name,
-                            this.props.project.tags.find((t) => t.name === tempTag.name).color))));
-                } else {
-                    this.canvas.current.editor.RM.updateTagsById(selectedRegion.id, null);
-                }
-
-                return region;
-            });
-        }
-        this.onAssetMetadataChanged(selectedAsset);
+        this.canvas.current.onTagClicked(tag);
+        this.onAssetMetadataChanged(this.state.selectedAsset);
     }
 
     /**

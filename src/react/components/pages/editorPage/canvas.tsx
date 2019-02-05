@@ -9,12 +9,13 @@ import { Tag } from "vott-ct/lib/js/CanvasTools/Core/Tag";
 import { strings } from "../../../../common/strings";
 import {
     IAssetMetadata, IRegion, RegionType, AppError, ErrorCode,
-    AssetState, EditorMode, IProject, AssetType,
+    AssetState, EditorMode, IProject, AssetType, ITagMetadata,
 } from "../../../../models/applicationState";
 import {
     Player, ControlBar, CurrentTimeDisplay, TimeDivider,
     BigPlayButton, PlaybackRateMenuButton, VolumeMenuButton,
 } from "video-react";
+import { ITag } from "vott-ct/lib/js/CanvasTools/Interface/ITag";
 
 export interface ICanvasProps {
     selectedAsset: IAssetMetadata;
@@ -122,6 +123,33 @@ export default class Canvas extends React.Component<ICanvasProps, ICanvasState> 
         }
 
         this.props.onAssetMetadataChanged(currentAssetMetadata);
+    }
+
+    public onTagClicked = (tag: ITagMetadata) => {
+        const selectedAsset = this.props.selectedAsset;
+        if (this.state.selectedRegions && this.state.selectedRegions.length) {
+            const selectedRegions = this.state.selectedRegions;
+            selectedRegions.map((region) => {
+                const selectedIndex = selectedAsset.regions.findIndex((r) => r.id === region.id);
+                const selectedRegion = selectedAsset.regions[selectedIndex];
+                const tagIndex = selectedRegion.tags.findIndex(
+                    (existingTag) => existingTag.name === tag.name);
+                if (tagIndex === -1) {
+                    selectedRegion.tags.push(tag);
+                } else {
+                    selectedRegion.tags.splice(tagIndex, 1);
+                }
+                if (selectedRegion.tags.length) {
+                    this.editor.RM.updateTagsById(selectedRegion.id,
+                        new TagsDescriptor(selectedRegion.tags.map((tempTag) => new Tag(tempTag.name,
+                            this.props.project.tags.find((t) => t.name === tempTag.name).color))));
+                } else {
+                    this.editor.RM.updateTagsById(selectedRegion.id, null);
+                }
+
+                return region;
+            });
+        }
     }
 
     /**
