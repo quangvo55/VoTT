@@ -42,7 +42,7 @@ export default class Canvas extends React.Component<ICanvasProps, ICanvasState> 
         canvasEnabled: true,
         lockedTags: [],
     };
-    private clipBoard: ClipBoard<IRegion[]> = new ClipBoard<IRegion[]>();
+    // private clipBoard: ClipBoard<IRegion[]> = new ClipBoard<IRegion[]>();
 
     private videoPlayer: React.RefObject<Player> = React.createRef<Player>();
 
@@ -72,9 +72,9 @@ export default class Canvas extends React.Component<ICanvasProps, ICanvasState> 
 
         return (
             <div id="ct-zone" className={this.state.canvasEnabled ? "canvas-enabled" : "canvas-disabled"}>
-                <KeyboardBinding accelerator={"Ctrl+c"} onKeyDown={this.copyRegions}/>
+                {/* <KeyboardBinding accelerator={"Ctrl+c"} onKeyDown={this.copyRegions}/>
                 <KeyboardBinding accelerator={"Ctrl+x"} onKeyDown={this.cutRegions}/>
-                <KeyboardBinding accelerator={"Ctrl+v"} onKeyDown={this.pasteRegions}/>
+                <KeyboardBinding accelerator={"Ctrl+v"} onKeyDown={this.pasteRegions}/> */}
 
                 {selectedAsset.asset.type === AssetType.Video &&
                     <Player ref={this.videoPlayer}
