@@ -9,7 +9,7 @@ import { Tag } from "vott-ct/lib/js/CanvasTools/Core/Tag";
 import { strings } from "../../../../common/strings";
 import {
     IAssetMetadata, IRegion, RegionType, AppError, ErrorCode,
-    AssetState, EditorMode, IProject, AssetType, ITag
+    AssetState, EditorMode, IProject, AssetType, ITag,
 } from "../../../../models/applicationState";
 import {
     Player, ControlBar, CurrentTimeDisplay, TimeDivider,
@@ -23,7 +23,7 @@ export interface ICanvasProps {
     onAssetMetadataChanged: (assetMetadata: IAssetMetadata) => void;
     editorMode: EditorMode;
     project: IProject;
-    onTagLocked? ()
+    onTagLocked?();
 }
 
 interface ICanvasState {
@@ -35,7 +35,6 @@ interface ICanvasState {
 
 export default class Canvas extends React.Component<ICanvasProps, ICanvasState> {
     public editor: Editor;
-    private clipBoard: ClipBoard<IRegion[]> = new ClipBoard<IRegion[]>();
 
     public state: ICanvasState = {
         loaded: false,
@@ -43,6 +42,7 @@ export default class Canvas extends React.Component<ICanvasProps, ICanvasState> 
         canvasEnabled: true,
         lockedTags: [],
     };
+    private clipBoard: ClipBoard<IRegion[]> = new ClipBoard<IRegion[]>();
 
     private videoPlayer: React.RefObject<Player> = React.createRef<Player>();
 
@@ -136,7 +136,7 @@ export default class Canvas extends React.Component<ICanvasProps, ICanvasState> 
 
     /**
      * Add tag to or remove tag from selected regions
-     * @param tag Tag to apply to or remove from selected regions 
+     * @param tag Tag to apply to or remove from selected regions
      */
     public onTagClicked = (tag: ITag) => {
         for (const region of this.state.selectedRegions) {
@@ -145,37 +145,11 @@ export default class Canvas extends React.Component<ICanvasProps, ICanvasState> 
     }
 
     public onTagShiftClicked = (tag: ITag) => {
-        this.setState(prevState => {
+        this.setState((prevState) => {
             return {
-                lockedTags: this.toggleTag(prevState.lockedTags, tag)
-            }
+                lockedTags: this.toggleTag(prevState.lockedTags, tag),
+            };
         });
-    }
-
-    /**
-     * Add tag to region if not there already, remove tag from region
-     * if already contained in tags. Update tags in CanvasTools editor
-     * @param region Region to add or remove tag
-     * @param tag Tag to add or remove from region
-     */
-    private toggleTagOnRegion = (region: IRegion, tag: ITag) => {
-        region.tags = this.toggleTag(region.tags, tag);
-        this.editor.RM.updateTagsById(region.id, this.getTagsDescriptor(region));
-    }
-
-    /**
-     * Add tag if not contained in list, Remove if contained
-     */
-    private toggleTag = (tags: ITag[], tag: ITag) => {
-        const tagIndex = tags.findIndex((existingTag) => existingTag.name === tag.name);
-        if (tagIndex === -1) {
-            // Tag isn't found within region tags, add it
-            tags.push(tag);
-        } else {
-            // Tag is within region tags, remove it
-            tags.splice(tagIndex, 1);
-        }
-        return tags;
     }
 
     /**
@@ -241,6 +215,32 @@ export default class Canvas extends React.Component<ICanvasProps, ICanvasState> 
         this.updateSelected(selectedRegions);
     }
 
+    /**
+     * Add tag to region if not there already, remove tag from region
+     * if already contained in tags. Update tags in CanvasTools editor
+     * @param region Region to add or remove tag
+     * @param tag Tag to add or remove from region
+     */
+    private toggleTagOnRegion = (region: IRegion, tag: ITag) => {
+        region.tags = this.toggleTag(region.tags, tag);
+        this.editor.RM.updateTagsById(region.id, this.getTagsDescriptor(region));
+    }
+
+    /**
+     * Add tag if not contained in list, Remove if contained
+     */
+    private toggleTag = (tags: ITag[], tag: ITag) => {
+        const tagIndex = tags.findIndex((existingTag) => existingTag.name === tag.name);
+        if (tagIndex === -1) {
+            // Tag isn't found within region tags, add it
+            tags.push(tag);
+        } else {
+            // Tag is within region tags, remove it
+            tags.splice(tagIndex, 1);
+        }
+        return tags;
+    }
+
     private copyRegions = () => {
         if (this.state.selectedRegions) {
             this.clipBoard.set(this.state.selectedRegions);
@@ -249,7 +249,7 @@ export default class Canvas extends React.Component<ICanvasProps, ICanvasState> 
 
     private cutRegions = () => {
         this.copyRegions();
-        for(const region of this.state.selectedRegions) {
+        for (const region of this.state.selectedRegions) {
             this.onRegionDelete(region.id);
         }
     }
@@ -275,9 +275,9 @@ export default class Canvas extends React.Component<ICanvasProps, ICanvasState> 
     }
 
     private addRegions = (regions: IRegion[]) => {
-        for(const region of regions) {
+        for (const region of regions) {
             this.editor.RM.addRegion(
-                region.id, 
+                region.id,
                 this.getRegionData(region),
                 this.getTagsDescriptor(region));
         }
@@ -352,8 +352,6 @@ export default class Canvas extends React.Component<ICanvasProps, ICanvasState> 
         }
     }
 
-
-
     private updateRegions = () => {
         if (this.props.selectedAsset.regions.length) {
             this.props.selectedAsset.regions.forEach((region: IRegion) => {
@@ -362,7 +360,7 @@ export default class Canvas extends React.Component<ICanvasProps, ICanvasState> 
                     region.id,
                     this.editor.scaleRegionToFrameSize(loadedRegionData),
                     this.getTagsDescriptor(region));
-                
+
                 if (this.state.selectedRegions) {
                     this.setState({
                         selectedRegions: [this.props.selectedAsset.regions[

@@ -42,7 +42,7 @@ export default function registerToolbar() {
         group: "canvas",
         type: ToolbarItemType.State,
     });
-    
+
     ToolbarItemFactory.register(DrawPolygon, {
         name: "drawPolygon",
         tooltip: "Draw Polygon",
@@ -81,8 +81,8 @@ export default function registerToolbar() {
         icon: "fa-ban",
         group: "regions",
         type: ToolbarItemType.Action,
-    })
-    
+    });
+
     ToolbarItemFactory.register(ZoomIn, {
         name: "zoomInCanvas",
         tooltip: "Zoom In",
