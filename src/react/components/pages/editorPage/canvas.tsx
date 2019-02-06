@@ -16,7 +16,7 @@ import {
     BigPlayButton, PlaybackRateMenuButton, VolumeMenuButton,
 } from "video-react";
 import { ITag } from "vott-ct/lib/js/CanvasTools/Interface/ITag";
-import { ClipBoard } from "../../../../common/clipboard";
+import { ClipBoard } from "../../../../common/clipBoard";
 import { KeyboardBinding } from "../../common/keyboardBinding/keyboardBinding";
 
 export interface ICanvasProps {
@@ -34,7 +34,7 @@ interface ICanvasState {
 
 export default class Canvas extends React.Component<ICanvasProps, ICanvasState> {
     public editor: Editor;
-    private clipBoard: ClipBoard<IRegion[]>;
+    private clipBoard: ClipBoard<IRegion[]> = new ClipBoard<IRegion[]>();
 
     public state: ICanvasState = {
         loaded: false,
@@ -70,9 +70,9 @@ export default class Canvas extends React.Component<ICanvasProps, ICanvasState> 
 
         return (
             <div id="ct-zone" className={this.state.canvasEnabled ? "canvas-enabled" : "canvas-disabled"}>
-                <KeyboardBinding accelerator={"Ctrl+C"} onKeyDown={this.copyRegions}/>
-                <KeyboardBinding accelerator={"Ctrl+X"} onKeyDown={this.cutRegions}/>
-                <KeyboardBinding accelerator={"Ctrl+V"} onKeyDown={this.pasteRegions}/>
+                <KeyboardBinding accelerator={"Ctrl+c"} onKeyDown={this.copyRegions}/>
+                <KeyboardBinding accelerator={"Ctrl+x"} onKeyDown={this.cutRegions}/>
+                <KeyboardBinding accelerator={"Ctrl+v"} onKeyDown={this.pasteRegions}/>
 
                 {selectedAsset.asset.type === AssetType.Video &&
                     <Player ref={this.videoPlayer}
@@ -143,9 +143,7 @@ export default class Canvas extends React.Component<ICanvasProps, ICanvasState> 
                 this.toggleTag(region, tag)
                 // There is a tag on the region
                 if (region.tags.length) {
-                    this.editor.RM.updateTagsById(region.id,
-                        new TagsDescriptor(region.tags.map((tempTag) => new Tag(tempTag.name,
-                            this.props.project.tags.find((t) => t.name === tempTag.name).color))));
+                    this.editor.RM.updateTagsById(region.id, this.getTagsDescriptor(region));
                 } else {
                     this.editor.RM.updateTagsById(region.id, null);
                 }
@@ -199,7 +197,10 @@ export default class Canvas extends React.Component<ICanvasProps, ICanvasState> 
      * @returns {void}
      */
     public onRegionDelete = (id: string) => {
+        // Remove from Canvas Tools
         this.editor.RM.deleteRegionById(id);
+
+        // Remove from project
         const currentAssetMetadata = this.props.selectedAsset;
         const deletedRegionIndex = this.props.selectedAsset.regions.findIndex((region) => region.id === id);
         currentAssetMetadata.regions.splice(deletedRegionIndex, 1);
@@ -228,7 +229,6 @@ export default class Canvas extends React.Component<ICanvasProps, ICanvasState> 
             selectedRegions = [
                 this.props.selectedAsset.regions.find((region) => region.id === id)];
         }
-        debugger;
         this.updateSelected(selectedRegions);
     }
 
@@ -240,12 +240,38 @@ export default class Canvas extends React.Component<ICanvasProps, ICanvasState> 
 
     private cutRegions = () => {
         this.copyRegions();
-        // Remove regions from asset
+        for(const region of this.state.selectedRegions) {
+            this.onRegionDelete(region.id);
+        }
+    }
+
+    private getRegionData(region: IRegion): RegionData {
+        return new RegionData(region.boundingBox.left,
+            region.boundingBox.top,
+            region.boundingBox.width,
+            region.boundingBox.height,
+            region.points.map((point) =>
+                new Point2D(point.x, point.y)),
+            this.regionTypeToType(region.type));
+    }
+
+    private getTagsDescriptor(region: IRegion): TagsDescriptor {
+        return new TagsDescriptor(region.tags.map((tag) => new Tag(tag.name,
+            this.props.project.tags.find((t) => t.name === tag.name).color)));
     }
 
     private pasteRegions = () => {
         const regions = this.clipBoard.get();
-        // Add regions to asset
+        this.addRegions(regions);
+    }
+
+    private addRegions = (regions: IRegion[]) => {
+        for(const region of regions) {
+            this.editor.RM.addRegion(
+                region.id, 
+                this.getRegionData(region),
+                this.getTagsDescriptor(region));
+        }
     }
 
     /**
@@ -317,24 +343,17 @@ export default class Canvas extends React.Component<ICanvasProps, ICanvasState> 
         }
     }
 
+
+
     private updateRegions = () => {
         if (this.props.selectedAsset.regions.length) {
             this.props.selectedAsset.regions.forEach((region: IRegion) => {
-                const loadedRegionData = new RegionData(region.boundingBox.left,
-                    region.boundingBox.top,
-                    region.boundingBox.width,
-                    region.boundingBox.height,
-                    region.points.map((point) =>
-                        new Point2D(point.x, point.y)),
-                    this.regionTypeToType(region.type));
-                if (region.tags.length) {
-                    this.editor.RM.addRegion(region.id, this.editor.scaleRegionToFrameSize(loadedRegionData),
-                        new TagsDescriptor(region.tags.map((tag) => new Tag(tag.name,
-                            this.props.project.tags.find((t) => t.name === tag.name).color))));
-                } else {
-                    this.editor.RM.addRegion(region.id, this.editor.scaleRegionToFrameSize(loadedRegionData),
-                        new TagsDescriptor());
-                }
+                const loadedRegionData = this.getRegionData(region);
+                this.editor.RM.addRegion(
+                    region.id,
+                    this.editor.scaleRegionToFrameSize(loadedRegionData),
+                    this.getTagsDescriptor(region));
+                
                 if (this.state.selectedRegions) {
                     this.setState({
                         selectedRegions: [this.props.selectedAsset.regions[

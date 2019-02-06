@@ -1,16 +1,18 @@
 import { ToolbarItemFactory } from "./providers/toolbar/toolbarItemFactory";
-import { SaveProject } from "./react/components/toolbar/saveProject";
-import { ExportProject } from "./react/components/toolbar/exportProject";
-import { Select } from "./react/components/toolbar/select";
-import { DrawRectangle } from "./react/components/toolbar/drawRectangle";
+import { CopyRegions } from "./react/components/toolbar/copyRectangle";
+import { CutRegions } from "./react/components/toolbar/cutRectangle";
 import { DrawPolygon } from "./react/components/toolbar/drawPolygon";
+import { DrawRectangle } from "./react/components/toolbar/drawRectangle";
+import { ExportProject } from "./react/components/toolbar/exportProject";
+import { NextAsset } from "./react/components/toolbar/nextAsset";
 import { Pan } from "./react/components/toolbar/pan";
+import { PasteRegions } from "./react/components/toolbar/pasteRectangle";
+import { PreviousAsset } from "./react/components/toolbar/previousAsset";
+import { SaveProject } from "./react/components/toolbar/saveProject";
+import { Select } from "./react/components/toolbar/select";
+import { ToolbarItemType } from "./react/components/toolbar/toolbarItem";
 import { ZoomIn } from "./react/components/toolbar/zoomIn";
 import { ZoomOut } from "./react/components/toolbar/zoomOut";
-import { ToolbarItemType } from "./react/components/toolbar/toolbarItem";
-import { CopyRectangle } from "./react/components/toolbar/copyRectangle";
-import { NextAsset } from "./react/components/toolbar/nextAsset";
-import { PreviousAsset } from "./react/components/toolbar/previousAsset";
 
 /**
  * Registers items for toolbar
@@ -39,15 +41,7 @@ export default function registerToolbar() {
         group: "canvas",
         type: ToolbarItemType.State,
     });
-
-    ToolbarItemFactory.register(CopyRectangle, {
-        name: "copyRectangle",
-        tooltip: "Copy Rectangle",
-        icon: "fa-clone",
-        group: "canvas",
-        type: ToolbarItemType.State,
-    });
-
+    
     ToolbarItemFactory.register(DrawPolygon, {
         name: "drawPolygon",
         tooltip: "Draw Polygon",
@@ -56,6 +50,31 @@ export default function registerToolbar() {
         type: ToolbarItemType.State,
     });
 
+    ToolbarItemFactory.register(CopyRegions, {
+        name: "copyRegions",
+        tooltip: "Copy Regions",
+        icon: "fa-clone",
+        group: "regions",
+        type: ToolbarItemType.State,
+    });
+
+    ToolbarItemFactory.register(CutRegions, {
+        name: "cutRegions",
+        tooltip: "Cut Regions",
+        icon: "fa-cut",
+        group: "regions",
+        type: ToolbarItemType.State,
+    });
+
+    ToolbarItemFactory.register(PasteRegions, {
+        name: "pasteRegions",
+        tooltip: "Paste Regions",
+        icon: "fa-paste",
+        group: "regions",
+        type: ToolbarItemType.State,
+    });
+
+    
     ToolbarItemFactory.register(ZoomIn, {
         name: "zoomInCanvas",
         tooltip: "Zoom In",

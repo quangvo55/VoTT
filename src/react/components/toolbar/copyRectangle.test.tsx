@@ -3,7 +3,7 @@ import { IToolbarItemProps, ToolbarItemType } from "./toolbarItem";
 import { mount, ReactWrapper } from "enzyme";
 import IProjectActions, * as projectActions from "../../../redux/actions/projectActions";
 import MockFactory from "../../../common/mockFactory";
-import { CopyRectangle } from "./copyRectangle";
+import { CopyRegions } from "./copyRectangle";
 
 describe("Copy Rectangle Toolbar Item", () => {
     const testProject = MockFactory.createTestProject("TestProject");
@@ -12,7 +12,7 @@ describe("Copy Rectangle Toolbar Item", () => {
     let wrapper: ReactWrapper<IToolbarItemProps> = null;
 
     function createComponent(props: IToolbarItemProps) {
-        return mount(<CopyRectangle {...props} />);
+        return mount(<CopyRegions {...props} />);
     }
 
     function createProps(): IToolbarItemProps {
