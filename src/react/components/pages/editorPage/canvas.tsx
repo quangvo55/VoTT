@@ -12,18 +12,21 @@ import { strings } from "../../../../common/strings";
 import { AppError, AssetState, AssetType, EditorMode,
     ErrorCode, IAssetMetadata, IProject, IRegion, ITag, RegionType } from "../../../../models/applicationState";
 import CanvasHelpers from "./canvasHelpers";
+import { ClipBoard } from "../../../../common/clipboard";
 
 export interface ICanvasProps {
     selectedAsset: IAssetMetadata;
     onAssetMetadataChanged: (assetMetadata: IAssetMetadata) => void;
     editorMode: EditorMode;
     project: IProject;
+    onTagLocked?: (tag: ITag) => void;
 }
 
 interface ICanvasState {
     loaded: boolean;
     selectedRegions?: IRegion[];
     canvasEnabled: boolean;
+    lockedTags: ITag[];
 }
 
 export default class Canvas extends React.Component<ICanvasProps, ICanvasState> {
@@ -33,7 +36,10 @@ export default class Canvas extends React.Component<ICanvasProps, ICanvasState> 
         loaded: false,
         selectedRegions: [],
         canvasEnabled: true,
+        lockedTags: [],
     };
+
+    private clipBoard: ClipBoard<IRegion[]> = new ClipBoard<IRegion[]>();
 
     private videoPlayer: React.RefObject<Player> = React.createRef<Player>();
 
@@ -131,6 +137,18 @@ export default class Canvas extends React.Component<ICanvasProps, ICanvasState> 
         }
     }
 
+    public onTagShiftClicked = (tag: ITag) => {
+        this.setState((prevState) => {
+            return {
+                lockedTags: CanvasHelpers.toggleTag(prevState.lockedTags, tag),
+            };
+        });
+    }
+
+    public onTagCtrlShiftClicked = (tag: ITag) => {
+        
+    }
+
     /**
      * Method called when moving a region already in the editor
      * @param {string} id the id of the region that was moved
@@ -203,6 +221,29 @@ export default class Canvas extends React.Component<ICanvasProps, ICanvasState> 
     private toggleTagOnRegion = (region: IRegion, tag: ITag) => {
         CanvasHelpers.toggleTag(region.tags, tag);
         this.editor.RM.updateTagsById(region.id, CanvasHelpers.getTagsDescriptor(region));
+    }
+
+    private copyRegions = () => {
+        if (this.state.selectedRegions) {
+            this.clipBoard.set(this.state.selectedRegions);
+        }
+    }
+
+    private cutRegions = () => {
+        this.copyRegions();
+        for (const region of this.state.selectedRegions) {
+            this.onRegionDelete(region.id);
+        }
+    }
+
+    private pasteRegions = () => {
+        this.addRegions(this.clipBoard.get());
+    }
+
+    private clearRegions = () => {
+        for (const region of this.props.selectedAsset.regions) {
+            this.onRegionDelete(region.id);
+        }
     }
 
     private addRegions = (regions: IRegion[]) => {

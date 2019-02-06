@@ -15,7 +15,7 @@ export default class CanvasHelpers {
      * @param tags Array of tags
      * @param tag Tag to toggle
      */
-    public static toggleTag(tags: ITag[], tag: ITag): void {
+    public static toggleTag(tags: ITag[], tag: ITag): ITag[] {
         const tagIndex = tags.findIndex((existingTag) => existingTag.name === tag.name);
         if (tagIndex === -1) {
             // Tag isn't found within region tags, add it
@@ -24,6 +24,7 @@ export default class CanvasHelpers {
             // Tag is within region tags, remove it
             tags.splice(tagIndex, 1);
         }
+        return tags;
     }
 
     /**
