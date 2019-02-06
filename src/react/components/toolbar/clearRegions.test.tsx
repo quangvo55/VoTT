@@ -9,7 +9,7 @@ describe("Clear Regions Toolbar Item", () => {
     const testProject = MockFactory.createTestProject("TestProject");
     const clickHandler = jest.fn();
     const actions = (projectActions as any) as IProjectActions;
-    let wrapper: ReactWrapper<IToolbarItemProps> = null;
+    const wrapper: ReactWrapper<IToolbarItemProps> = null;
 
     function createComponent(props: IToolbarItemProps) {
         return mount(<ClearRegions {...props} />);

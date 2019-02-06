@@ -1,4 +1,4 @@
-import { ClipBoard } from "./clipBoard";
+import { ClipBoard } from "./clipboard";
 
 describe("Test ClipBoard", () => {
 

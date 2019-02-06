@@ -15,7 +15,7 @@ import {
     Player, ControlBar, CurrentTimeDisplay, TimeDivider,
     BigPlayButton, PlaybackRateMenuButton, VolumeMenuButton,
 } from "video-react";
-import { ClipBoard } from "../../../../common/clipBoard";
+import { ClipBoard } from "../../../../common/clipboard";
 import { KeyboardBinding } from "../../common/keyboardBinding/keyboardBinding";
 
 export interface ICanvasProps {
