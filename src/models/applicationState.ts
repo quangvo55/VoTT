@@ -117,6 +117,7 @@ export interface IProject {
 export interface ITag {
     name: string;
     color: string;
+    properties?: any;
 }
 
 /**
@@ -242,20 +243,9 @@ export interface ISize {
 export interface IRegion {
     id: string;
     type: RegionType;
-    tags: ITagMetadata[];
+    tags: ITag[];
     points?: IPoint[];
     boundingBox?: IBoundingBox;
-}
-
-/**
- * @name - Tag Metadata
- * @description - Defines the tag usage within a region
- * @member name - The tag name
- * @member properties - An object that defines additional metadata for this tag
- */
-export interface ITagMetadata {
-    name: string;
-    properties?: object;
 }
 
 /**

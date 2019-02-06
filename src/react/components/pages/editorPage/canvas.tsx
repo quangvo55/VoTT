@@ -9,13 +9,12 @@ import { Tag } from "vott-ct/lib/js/CanvasTools/Core/Tag";
 import { strings } from "../../../../common/strings";
 import {
     IAssetMetadata, IRegion, RegionType, AppError, ErrorCode,
-    AssetState, EditorMode, IProject, AssetType, ITagMetadata,
+    AssetState, EditorMode, IProject, AssetType, ITag
 } from "../../../../models/applicationState";
 import {
     Player, ControlBar, CurrentTimeDisplay, TimeDivider,
     BigPlayButton, PlaybackRateMenuButton, VolumeMenuButton,
 } from "video-react";
-import { ITag } from "vott-ct/lib/js/CanvasTools/Interface/ITag";
 import { ClipBoard } from "../../../../common/clipBoard";
 import { KeyboardBinding } from "../../common/keyboardBinding/keyboardBinding";
 
@@ -24,12 +23,14 @@ export interface ICanvasProps {
     onAssetMetadataChanged: (assetMetadata: IAssetMetadata) => void;
     editorMode: EditorMode;
     project: IProject;
+    onTagLocked? ()
 }
 
 interface ICanvasState {
     loaded: boolean;
     selectedRegions?: IRegion[];
     canvasEnabled: boolean;
+    lockedTags: ITag[];
 }
 
 export default class Canvas extends React.Component<ICanvasProps, ICanvasState> {
@@ -40,6 +41,7 @@ export default class Canvas extends React.Component<ICanvasProps, ICanvasState> 
         loaded: false,
         selectedRegions: [],
         canvasEnabled: true,
+        lockedTags: [],
     };
 
     private videoPlayer: React.RefObject<Player> = React.createRef<Player>();
@@ -136,37 +138,44 @@ export default class Canvas extends React.Component<ICanvasProps, ICanvasState> 
      * Add tag to or remove tag from selected regions
      * @param tag Tag to apply to or remove from selected regions 
      */
-    public onTagClicked = (tag: ITagMetadata) => {
-        if (this.state.selectedRegions && this.state.selectedRegions.length) {
-            const selectedRegions = this.state.selectedRegions;
-            selectedRegions.map((region) => {
-                this.toggleTag(region, tag)
-                // There is a tag on the region
-                if (region.tags.length) {
-                    this.editor.RM.updateTagsById(region.id, this.getTagsDescriptor(region));
-                } else {
-                    this.editor.RM.updateTagsById(region.id, null);
-                }
-                return region;
-            });
+    public onTagClicked = (tag: ITag) => {
+        for (const region of this.state.selectedRegions) {
+            this.toggleTagOnRegion(region, tag);
         }
+    }
+
+    public onTagShiftClicked = (tag: ITag) => {
+        this.setState(prevState => {
+            return {
+                lockedTags: this.toggleTag(prevState.lockedTags, tag)
+            }
+        });
     }
 
     /**
      * Add tag to region if not there already, remove tag from region
-     * if already contained in tags
+     * if already contained in tags. Update tags in CanvasTools editor
      * @param region Region to add or remove tag
      * @param tag Tag to add or remove from region
      */
-    private toggleTag = (region: IRegion, tag: ITagMetadata) => {
-        const tagIndex = region.tags.findIndex((existingTag) => existingTag.name === tag.name);
+    private toggleTagOnRegion = (region: IRegion, tag: ITag) => {
+        region.tags = this.toggleTag(region.tags, tag);
+        this.editor.RM.updateTagsById(region.id, this.getTagsDescriptor(region));
+    }
+
+    /**
+     * Add tag if not contained in list, Remove if contained
+     */
+    private toggleTag = (tags: ITag[], tag: ITag) => {
+        const tagIndex = tags.findIndex((existingTag) => existingTag.name === tag.name);
         if (tagIndex === -1) {
             // Tag isn't found within region tags, add it
-            region.tags.push(tag);
+            tags.push(tag);
         } else {
             // Tag is within region tags, remove it
-            region.tags.splice(tagIndex, 1);
+            tags.splice(tagIndex, 1);
         }
+        return tags;
     }
 
     /**
