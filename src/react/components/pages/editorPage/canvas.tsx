@@ -42,7 +42,7 @@ export default class Canvas extends React.Component<ICanvasProps, ICanvasState> 
         canvasEnabled: true,
         lockedTags: [],
     };
-    // private clipBoard: ClipBoard<IRegion[]> = new ClipBoard<IRegion[]>();
+    private clipBoard: ClipBoard<IRegion[]> = new ClipBoard<IRegion[]>();
 
     private videoPlayer: React.RefObject<Player> = React.createRef<Player>();
 
