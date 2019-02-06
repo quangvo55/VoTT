@@ -13,6 +13,7 @@ import { Select } from "./react/components/toolbar/select";
 import { ToolbarItemType } from "./react/components/toolbar/toolbarItem";
 import { ZoomIn } from "./react/components/toolbar/zoomIn";
 import { ZoomOut } from "./react/components/toolbar/zoomOut";
+import { ClearRegions } from "./react/components/toolbar/clearRegions";
 
 /**
  * Registers items for toolbar
@@ -73,6 +74,14 @@ export default function registerToolbar() {
         group: "regions",
         type: ToolbarItemType.State,
     });
+
+    ToolbarItemFactory.register(ClearRegions, {
+        name: "clearRegions",
+        tooltip: "Clear Regions",
+        icon: "fa-ban",
+        group: "regions",
+        type: ToolbarItemType.Action,
+    })
     
     ToolbarItemFactory.register(ZoomIn, {
         name: "zoomInCanvas",
