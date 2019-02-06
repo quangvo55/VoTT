@@ -43,7 +43,7 @@ function getState(wrapper): IEditorPageState {
     return wrapper.find(EditorPage).childAt(0).state() as IEditorPageState;
 }
 
-function getMockAssetMetadata(testAssets, assetIndex=0): IAssetMetadata {
+function getMockAssetMetadata(testAssets, assetIndex= 0): IAssetMetadata {
     const mockRegion = MockFactory.createMockRegion();
     return {
         asset: {
@@ -56,10 +56,10 @@ function getMockAssetMetadata(testAssets, assetIndex=0): IAssetMetadata {
                 tags: [
                     {
                         ...mockRegion.tags[0],
-                        color: expect.stringMatching(/^#(?:[0-9a-f]{3}){1,2}$/i)
-                    }
-                ]
-            }
+                        color: expect.stringMatching(/^#(?:[0-9a-f]{3}){1,2}$/i),
+                    },
+                ],
+            },
         ],
         timestamp: null,
     };
@@ -240,7 +240,7 @@ describe("Editor Page Component", () => {
 
             const expectedAssetMetadtata: IAssetMetadata = getMockAssetMetadata(testAssets, 1);
 
-            expect(getState(wrapper).selectedAsset).toEqual(expectedAssetMetadtata);
+            expect(getState(wrapper).selectedAsset).toMatchObject(expectedAssetMetadtata);
         });
 
         it("selects the previous asset when clicking the 'Previous Asset' button in the toolbar", async () => {
@@ -252,7 +252,7 @@ describe("Editor Page Component", () => {
 
             const expectedAssetMetadtata: IAssetMetadata = getMockAssetMetadata(testAssets, 1);
 
-            expect(getState(wrapper).selectedAsset).toEqual(expectedAssetMetadtata);
+            expect(getState(wrapper).selectedAsset).toMatchObject(expectedAssetMetadtata);
         });
     });
 
