@@ -1,12 +1,12 @@
 import { ToolbarItemFactory } from "./providers/toolbar/toolbarItemFactory";
-import { CopyRegions } from "./react/components/toolbar/copyRectangle";
-import { CutRegions } from "./react/components/toolbar/cutRectangle";
+import { CopyRegions } from "./react/components/toolbar/copyRegions";
+import { CutRegions } from "./react/components/toolbar/cutRegions";
 import { DrawPolygon } from "./react/components/toolbar/drawPolygon";
 import { DrawRectangle } from "./react/components/toolbar/drawRectangle";
 import { ExportProject } from "./react/components/toolbar/exportProject";
 import { NextAsset } from "./react/components/toolbar/nextAsset";
 import { Pan } from "./react/components/toolbar/pan";
-import { PasteRegions } from "./react/components/toolbar/pasteRectangle";
+import { PasteRegions } from "./react/components/toolbar/pasteRegions";
 import { PreviousAsset } from "./react/components/toolbar/previousAsset";
 import { SaveProject } from "./react/components/toolbar/saveProject";
 import { Select } from "./react/components/toolbar/select";
@@ -73,7 +73,6 @@ export default function registerToolbar() {
         group: "regions",
         type: ToolbarItemType.State,
     });
-
     
     ToolbarItemFactory.register(ZoomIn, {
         name: "zoomInCanvas",

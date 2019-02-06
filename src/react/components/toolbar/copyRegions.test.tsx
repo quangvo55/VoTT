@@ -3,7 +3,7 @@ import { IToolbarItemProps, ToolbarItemType } from "./toolbarItem";
 import { mount, ReactWrapper } from "enzyme";
 import IProjectActions, * as projectActions from "../../../redux/actions/projectActions";
 import MockFactory from "../../../common/mockFactory";
-import { CopyRegions } from "./copyRectangle";
+import { CopyRegions } from "./copyRegions";
 
 describe("Copy Rectangle Toolbar Item", () => {
     const testProject = MockFactory.createTestProject("TestProject");
