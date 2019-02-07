@@ -150,15 +150,14 @@ export default class Canvas extends React.Component<ICanvasProps, ICanvasState> 
             },
             points: scaledRegionData.points,
         };
-        const currentAssetMetadata = this.props.selectedAsset;
-        currentAssetMetadata.regions.push(newRegion);
+        this.addRegionToAsset(newRegion);
         this.updateSelected([newRegion]);
-
-        if (currentAssetMetadata.regions.length) {
-            currentAssetMetadata.asset.state = AssetState.Tagged;
+        // Apply locked tags if there are some
+        if (this.state.lockedTags) {
+            for(const tag of this.state.lockedTags) {
+                this.toggleTagOnRegion(newRegion, tag);
+            }
         }
-
-        this.props.onAssetMetadataChanged(currentAssetMetadata);
     }
 
     /**
@@ -292,12 +291,24 @@ export default class Canvas extends React.Component<ICanvasProps, ICanvasState> 
         }
     }
 
+    private addRegionToAsset = (region: IRegion) => {
+        const currentAssetMetadata = this.props.selectedAsset;
+        currentAssetMetadata.regions.push(region);
+
+        if (currentAssetMetadata.regions.length) {
+            currentAssetMetadata.asset.state = AssetState.Tagged;
+        }
+
+        this.props.onAssetMetadataChanged(currentAssetMetadata);
+    }
+
     private addRegions = (regions: IRegion[]) => {
         for (const region of regions) {
             this.editor.RM.addRegion(
                 region.id,
                 CanvasHelpers.getRegionData(region),
                 CanvasHelpers.getTagsDescriptor(region));
+            this.addRegionToAsset(region);
         }
     }
 
