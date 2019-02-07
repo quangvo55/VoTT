@@ -189,16 +189,6 @@ export default class Canvas extends React.Component<ICanvasProps, ICanvasState> 
     }
 
     /**
-     * Add tag to or remove tag from selected regions
-     * @param tag Tag to apply to or remove from selected regions
-     */
-    public onTagClicked = (tag: ITag) => {
-        for (const region of this.state.selectedRegions) {
-            this.toggleTagOnRegion(region, tag);
-        }
-    }
-
-    /**
      * Method called when moving a region already in the editor
      * @param {string} id the id of the region that was moved
      * @param {RegionData} regionData the RegionData of moved region
@@ -340,26 +330,6 @@ export default class Canvas extends React.Component<ICanvasProps, ICanvasState> 
             currentAssetMetadata = this.addRegionToAsset(region);
         }
         this.props.onAssetMetadataChanged(currentAssetMetadata);
-    }
-
-    /**
-     * Add tag to region if not there already, remove tag from region
-     * if already contained in tags. Update tags in CanvasTools editor
-     * @param region Region to add or remove tag
-     * @param tag Tag to add or remove from region
-     */
-    private toggleTagOnRegion = (region: IRegion, tag: ITag) => {
-        CanvasHelpers.toggleTag(region.tags, tag);
-        this.editor.RM.updateTagsById(region.id, CanvasHelpers.getTagsDescriptor(region));
-    }
-
-    private addRegions = (regions: IRegion[]) => {
-        for (const region of regions) {
-            this.editor.RM.addRegion(
-                region.id,
-                CanvasHelpers.getRegionData(region),
-                CanvasHelpers.getTagsDescriptor(region));
-        }
     }
 
     /**
