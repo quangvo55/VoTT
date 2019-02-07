@@ -150,14 +150,14 @@ export default class Canvas extends React.Component<ICanvasProps, ICanvasState> 
             },
             points: scaledRegionData.points,
         };
-        this.addRegionToAsset(newRegion);
-        this.updateSelected([newRegion]);
         // Apply locked tags if there are some
         if (this.state.lockedTags) {
             for(const tag of this.state.lockedTags) {
                 this.toggleTagOnRegion(newRegion, tag);
             }
         }
+        this.addRegionToAsset(newRegion);
+        this.updateSelected([newRegion]);
     }
 
     /**
