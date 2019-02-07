@@ -1,18 +1,17 @@
 import React from "react";
 import * as shortid from "shortid";
-import { BigPlayButton, ControlBar, CurrentTimeDisplay,
-    PlaybackRateMenuButton, Player, TimeDivider, VolumeMenuButton } from "video-react";
+import { BigPlayButton, ControlBar, CurrentTimeDisplay, PlaybackRateMenuButton,
+    Player, TimeDivider, VolumeMenuButton } from "video-react";
 import { CanvasTools } from "vott-ct";
 import { Editor } from "vott-ct/lib/js/CanvasTools/CanvasTools.Editor";
-import { Point2D } from "vott-ct/lib/js/CanvasTools/Core/Point2D";
-import { RegionData, RegionDataType } from "vott-ct/lib/js/CanvasTools/Core/RegionData";
-import { Tag } from "vott-ct/lib/js/CanvasTools/Core/Tag";
-import { TagsDescriptor } from "vott-ct/lib/js/CanvasTools/Core/TagsDescriptor";
-import { strings } from "../../../../common/strings";
-import { AppError, AssetState, AssetType, EditorMode,
-    ErrorCode, IAssetMetadata, IProject, IRegion, ITag, RegionType } from "../../../../models/applicationState";
-import CanvasHelpers from "./canvasHelpers";
+import { RegionData } from "vott-ct/lib/js/CanvasTools/Core/RegionData";
 import { ClipBoard } from "../../../../common/clipboard";
+import { strings } from "../../../../common/strings";
+import { AppError, AssetState, AssetType, EditorMode, 
+    ErrorCode, IAssetMetadata, IProject, IRegion, ITag, RegionType } from "../../../../models/applicationState";
+import { KeyboardBinding } from "../../common/keyboardBinding/keyboardBinding";
+import { KeyEventType } from "../../common/keyboardManager/keyboardManager";
+import CanvasHelpers from "./canvasHelpers";
 
 export interface ICanvasProps {
     selectedAsset: IAssetMetadata;
@@ -27,6 +26,7 @@ interface ICanvasState {
     selectedRegions?: IRegion[];
     canvasEnabled: boolean;
     lockedTags: ITag[];
+    multiSelect: boolean;
 }
 
 export default class Canvas extends React.Component<ICanvasProps, ICanvasState> {
@@ -37,6 +37,7 @@ export default class Canvas extends React.Component<ICanvasProps, ICanvasState> 
         selectedRegions: [],
         canvasEnabled: true,
         lockedTags: [],
+        multiSelect: false,
     };
 
     private clipBoard: ClipBoard<IRegion[]> = new ClipBoard<IRegion[]>();
@@ -69,6 +70,16 @@ export default class Canvas extends React.Component<ICanvasProps, ICanvasState> 
 
         return (
             <div id="ct-zone" className={this.state.canvasEnabled ? "canvas-enabled" : "canvas-disabled"}>
+                <KeyboardBinding
+                    keyEventType={KeyEventType.KeyDown}
+                    accelerator={"Shift"}
+                    onKeyEvent={() => this.setMultiSelect(true)}
+                />
+                <KeyboardBinding
+                    keyEventType={KeyEventType.KeyUp}
+                    accelerator={"Shift"}
+                    onKeyEvent={() => this.setMultiSelect(false)}
+                />
                 {selectedAsset.asset.type === AssetType.Video &&
                     <Player ref={this.videoPlayer}
                         fluid={false} width={"100%"} height={"100%"}
@@ -199,17 +210,24 @@ export default class Canvas extends React.Component<ICanvasProps, ICanvasState> 
      * @param {boolean} multiselection boolean whether multiselect is active
      * @returns {void}
      */
-    public onRegionSelected = (id: string, multiselect: boolean) => {
+    public onRegionSelected = (id: string) => {
         let selectedRegions = this.state.selectedRegions;
 
-        if (multiselect) {
+        if (this.state.multiSelect) {
             selectedRegions.push(
                 this.props.selectedAsset.regions.find((region) => region.id === id));
         } else {
             selectedRegions = [
-                this.props.selectedAsset.regions.find((region) => region.id === id)];
+                this.props.selectedAsset.regions.find((region) => region.id === id)
+            ];
         }
         this.updateSelected(selectedRegions);
+    }
+
+    private setMultiSelect = (multiSelect: boolean) => {
+        if (multiSelect !== this.state.multiSelect) {
+            this.setState({ multiSelect });
+        }
     }
 
     /**
