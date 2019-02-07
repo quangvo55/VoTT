@@ -1,19 +1,15 @@
 import React from "react";
 import * as shortid from "shortid";
-import { BigPlayButton, ControlBar, CurrentTimeDisplay, PlaybackRateMenuButton,
-    Player, TimeDivider, VolumeMenuButton } from "video-react";
+import { BigPlayButton, ControlBar, CurrentTimeDisplay, PlaybackRateMenuButton, Player, TimeDivider, VolumeMenuButton } from "video-react";
 import { CanvasTools } from "vott-ct";
 import { Editor } from "vott-ct/lib/js/CanvasTools/CanvasTools.Editor";
 import { RegionData } from "vott-ct/lib/js/CanvasTools/Core/RegionData";
 import { ClipBoard } from "../../../../common/clipboard";
 import { strings } from "../../../../common/strings";
-import { AppError, AssetState, AssetType, EditorMode, 
-    ErrorCode, IAssetMetadata, IProject, IRegion, ITag, RegionType, IPoint, IBoundingBox, IAsset } from "../../../../models/applicationState";
+import { AppError, AssetState, AssetType, EditorMode, ErrorCode, IAssetMetadata, IProject, IRegion, ITag, RegionType } from "../../../../models/applicationState";
 import { KeyboardBinding } from "../../common/keyboardBinding/keyboardBinding";
 import { KeyEventType } from "../../common/keyboardManager/keyboardManager";
 import CanvasHelpers from "./canvasHelpers";
-import { RectRegion } from "vott-ct/lib/js/CanvasTools/Region/Rect/RectRegion";
-import { Point2D } from "vott-ct/lib/js/CanvasTools/Core/Point2D";
 
 export interface ICanvasProps {
     selectedAsset: IAssetMetadata;
@@ -193,6 +189,16 @@ export default class Canvas extends React.Component<ICanvasProps, ICanvasState> 
     }
 
     /**
+     * Add tag to or remove tag from selected regions
+     * @param tag Tag to apply to or remove from selected regions
+     */
+    public onTagClicked = (tag: ITag) => {
+        for (const region of this.state.selectedRegions) {
+            this.toggleTagOnRegion(region, tag);
+        }
+    }
+
+    /**
      * Method called when moving a region already in the editor
      * @param {string} id the id of the region that was moved
      * @param {RegionData} regionData the RegionData of moved region
@@ -334,6 +340,26 @@ export default class Canvas extends React.Component<ICanvasProps, ICanvasState> 
             currentAssetMetadata = this.addRegionToAsset(region);
         }
         this.props.onAssetMetadataChanged(currentAssetMetadata);
+    }
+
+    /**
+     * Add tag to region if not there already, remove tag from region
+     * if already contained in tags. Update tags in CanvasTools editor
+     * @param region Region to add or remove tag
+     * @param tag Tag to add or remove from region
+     */
+    private toggleTagOnRegion = (region: IRegion, tag: ITag) => {
+        CanvasHelpers.toggleTag(region.tags, tag);
+        this.editor.RM.updateTagsById(region.id, CanvasHelpers.getTagsDescriptor(region));
+    }
+
+    private addRegions = (regions: IRegion[]) => {
+        for (const region of regions) {
+            this.editor.RM.addRegion(
+                region.id,
+                CanvasHelpers.getRegionData(region),
+                CanvasHelpers.getTagsDescriptor(region));
+        }
     }
 
     /**

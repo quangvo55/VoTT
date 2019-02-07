@@ -9,7 +9,6 @@ import { IBoundingBox, IPoint, IRegion, ITag, RegionType } from "../../../../mod
  * Margin to leave between pasted element and previously pasted element or edge of screen
  */
 const pasteMargin = 10;
-
 /**
  * Static functions to assist in operations within Canvas component
  */
