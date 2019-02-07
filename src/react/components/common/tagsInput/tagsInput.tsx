@@ -92,6 +92,7 @@ export default class TagsInput<T extends ITagsInputProps> extends React.Componen
                     autofocus={false}
                     handleDelete={this.handleDelete}
                     handleAddition={this.handleAddition}
+                    allowAdditionFromPaste={false}
                     handleDrag={this.handleDrag}
                     delimiters={delimiters} />
                 <TagEditorModal
