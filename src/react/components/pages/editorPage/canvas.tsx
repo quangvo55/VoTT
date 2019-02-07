@@ -8,10 +8,12 @@ import { RegionData } from "vott-ct/lib/js/CanvasTools/Core/RegionData";
 import { ClipBoard } from "../../../../common/clipboard";
 import { strings } from "../../../../common/strings";
 import { AppError, AssetState, AssetType, EditorMode, 
-    ErrorCode, IAssetMetadata, IProject, IRegion, ITag, RegionType } from "../../../../models/applicationState";
+    ErrorCode, IAssetMetadata, IProject, IRegion, ITag, RegionType, IPoint, IBoundingBox } from "../../../../models/applicationState";
 import { KeyboardBinding } from "../../common/keyboardBinding/keyboardBinding";
 import { KeyEventType } from "../../common/keyboardManager/keyboardManager";
 import CanvasHelpers from "./canvasHelpers";
+import { RectRegion } from "vott-ct/lib/js/CanvasTools/Region/Rect/RectRegion";
+import { Point2D } from "vott-ct/lib/js/CanvasTools/Core/Point2D";
 
 export interface ICanvasProps {
     selectedAsset: IAssetMetadata;
@@ -80,6 +82,27 @@ export default class Canvas extends React.Component<ICanvasProps, ICanvasState> 
                     accelerator={"Shift"}
                     onKeyEvent={() => this.setMultiSelect(false)}
                 />
+                <KeyboardBinding
+                    keyEventType={KeyEventType.KeyDown}
+                    accelerator={"Ctrl+c"}
+                    onKeyEvent={this.copyRegions}
+                />
+                <KeyboardBinding
+                    keyEventType={KeyEventType.KeyDown}
+                    accelerator={"Ctrl+x"}
+                    onKeyEvent={this.cutRegions}
+                />
+                <KeyboardBinding
+                    keyEventType={KeyEventType.KeyDown}
+                    accelerator={"Ctrl+v"}
+                    onKeyEvent={this.pasteRegions}
+                />
+                <KeyboardBinding
+                    keyEventType={KeyEventType.KeyDown}
+                    accelerator={"Ctrl+a"}
+                    onKeyEvent={this.selectAllRegions}
+                />
+                
                 {selectedAsset.asset.type === AssetType.Video &&
                     <Player ref={this.videoPlayer}
                         fluid={false} width={"100%"} height={"100%"}
@@ -255,7 +278,12 @@ export default class Canvas extends React.Component<ICanvasProps, ICanvasState> 
     }
 
     private pasteRegions = () => {
-        this.addRegions(this.clipBoard.get());
+        const regions = this.clipBoard.get();
+        if (regions) {
+            const newRegions = regions.map(
+                (region) => CanvasHelpers.duplicateAndTransformRegion(region, this.props.selectedAsset.regions));
+            this.addRegions(newRegions);
+        }
     }
 
     private clearRegions = () => {
@@ -362,9 +390,11 @@ export default class Canvas extends React.Component<ICanvasProps, ICanvasState> 
     }
 
     private updateSelected = (selectedRegions: IRegion[]) => {
-        this.setState({
-            selectedRegions,
-        });
+        this.setState({ selectedRegions });
+    }
+
+    private selectAllRegions = () => {
+        this.updateSelected(this.props.selectedAsset.regions);
     }
 
     private getAssetType = () => {
