@@ -111,6 +111,16 @@ describe("Html File Reader", () => {
     });
 
     describe("Download asset binaries array", () => {
+        axios.get = jest.fn((url, config) => {
+            return Promise.resolve<AxiosResponse>({
+                config,
+                headers: null,
+                status: 200,
+                statusText: "OK",
+                data: [1, 2, 3],
+            });
+        });
+
         it("Downloads a byte array from the asset path", async () => {
             const asset = AssetService.createAssetFromFilePath("https://server.com/image.jpg");
             axios.get = jest.fn((url, config) => {
@@ -128,20 +138,8 @@ describe("Html File Reader", () => {
             expect(result).toBeInstanceOf(Uint8Array);
             expect(axios.get).toBeCalledWith(asset.path, { responseType: "blob" });
         });
-    });
 
-    describe("Test non valid asset type", () => {
         it("Test non valid asset type", async () => {
-            axios.get = jest.fn((url, config) => {
-                return Promise.resolve<AxiosResponse>({
-                    config,
-                    headers: null,
-                    status: 200,
-                    statusText: "OK",
-                    data: [1, 2, 3],
-                });
-            });
-
             const imageAsset = AssetService.createAssetFromFilePath("https://server.com/image.notsupported");
             try {
                 const result = await HtmlFileReader.readAssetAttributes(imageAsset);
